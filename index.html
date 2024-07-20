@@ -1,58 +1,78 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>User Location</title>
-  </head>
-  <body>
-    <div id="location">
-      We need your permission to access your location.
-      Please allow the geolocation request in your browser.
-    </div>
+<head>
+  <title>User Location</title>
+  <link
+    rel="stylesheet"
+    href="//unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <script
+    src="//unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+  <style>
+    #map {
+      height: 400px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div id="location">We need your permission to access your location. Please allow the geolocation request in your browser.</div>
+  <div id="map" class="h-[300px] w-full rounded-lg"></div>
 
-    <script>
-      function requestGeolocation() {
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(
-            showPosition,
-            showError
-          );
-        } else {
-          document.getElementById("location").innerText =
-            "Geolocation is not supported by this browser.";
+  <script>
+    function requestGeolocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition, showError);
+      } else {
+        document.getElementById("location").innerText = "Geolocation is not supported by this browser.";
+      }
+    }
+
+    function showPosition(position) {
+      const userLat = position.coords.latitude;
+      const userLng = position.coords.longitude;
+      document.getElementById("location").innerText = `Latitude: ${userLat}, Longitude: ${userLng}`;
+
+      // Initialize the map and set the view to the user's location
+      const map = L.map("map").setView([userLat, userLng], 13);
+      L.tileLayer(
+        "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+          maxZoom: 19,
+          attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
         }
-      }
+      ).addTo(map);
 
-      function showPosition(position) {
-        const userLat = position.coords.latitude;
-        const userLng = position.coords.longitude;
-        document.getElementById(
-          "location"
-        ).innerText = `Latitude: ${userLat}, Longitude: ${userLng}`;
-      }
+      // Add a marker at the user's location
+      L.marker([userLat, userLng]).addTo(map)
+        .bindPopup("You are here!")
+        .openPopup();
+    }
 
-      function showError(error) {
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            document.getElementById("location").innerText =
-              "User denied the request for Geolocation.";
-            break;
-          case error.POSITION_UNAVAILABLE:
-            document.getElementById("location").innerText =
-              "Location information is unavailable.";
-            break;
-          case error.TIMEOUT:
-            document.getElementById("location").innerText =
-              "The request to get user location timed out.";
-            break;
-          case error.UNKNOWN_ERROR:
-            document.getElementById("location").innerText =
-              "An unknown error occurred.";
-            break;
-        }
+    function showError(error) {
+      switch(error.code) {
+        case error.PERMISSION_DENIED:
+          document.getElementById("location").innerText = "User denied the request for Geolocation.";
+          break;
+        case error.POSITION_UNAVAILABLE:
+          document.getElementById("location").innerText = "Location information is unavailable.";
+          break;
+        case error.TIMEOUT:
+          document.getElementById("location").innerText = "The request to get user location timed out.";
+          break;
+        case error.UNKNOWN_ERROR:
+          document.getElementById("location").innerText = "An unknown error occurred.";
+          break;
       }
+    }
 
-      // Request geolocation after a short delay to ensure the user sees the message
-      setTimeout(requestGeolocation, 1000);
-    </script>
-  </body>
+    // Request geolocation after a short delay to ensure the user sees the message
+    setTimeout(requestGeolocation, 1000);
+  </script>
+</body>
 </html>
